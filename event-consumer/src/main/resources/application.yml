@@ -1,0 +1,35 @@
+server:
+  port: 9091
+spring:
+  application:
+    name: event-consumer
+  cloud:
+    function:
+      definition: clickEvents
+    stream:
+      bindings:
+        clickEvents-in-0:
+          destination: click-events
+          group: raw-click-events
+      rabbit:
+        bindings:
+          clickEvents-in-0:
+            consumer:
+              binding-routing-key: "user.events.click"
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    baggage:
+      correlation:
+        enabled: true
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+        enabled: true
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+      export:
+        enabled: true
