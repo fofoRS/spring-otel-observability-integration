@@ -6,13 +6,13 @@ spring:
   cloud:
     stream:
       bindings:
-        clientEvents-out-0:
+        rawUserClickEvents-out-0:
           destination: click-events
       rabbit:
         bindings:
-          clientEvents-out-0:
+          rawUserClickEvents-out-0:
             producer:
-              routing-key: "user.events.click"
+              routing-key: "user.raw.events.click"
 management:
   tracing:
     sampling:

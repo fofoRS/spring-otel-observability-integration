@@ -5,17 +5,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+
 @Component
 public class TimeBaseClickEventPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(TimeBaseClickEventPublisher.class);
 
-    private static final String outputChannel = "clientEvents-out-0";
+    private static final String outputChannel = "rawUserClickEvents-out-0";
 
     private final StreamBridge streamBridge;
 
-    public TimeBaseClickEventPublisher(StreamBridge streamBridge) {
+    private final Tracer tracer;
+
+    public TimeBaseClickEventPublisher(StreamBridge streamBridge, Tracer tracer) {
         this.streamBridge = streamBridge;
+        this.tracer = tracer;
     }
 
     public void initPublishing() throws InterruptedException {
@@ -30,12 +36,20 @@ public class TimeBaseClickEventPublisher {
             }
             Long timestamp = System.currentTimeMillis();
 
-            UserEvent userEvent = new UserEvent(eventType,count,timestamp);
+            UserEvent userEvent = new UserEvent(eventType, count, timestamp);
 
-            logger.info("Publishing event - {}", userEvent);
-            streamBridge.send(outputChannel,userEvent);
-
+            // Create a new span for each event
+            Span span = tracer.nextSpan().name("raw-user-client-event-publisher");
+            try (Tracer.SpanInScope ws = tracer.withSpan(span.start())) {
+                logger.info("Publishing event - {}", userEvent);
+                span.tag("user.id", userEvent.userId().toString());
+                span.tag("event.type", userEvent.eventType());
+                span.tag("timestamp", userEvent.timestamp().toString());
+                
+                streamBridge.send(outputChannel, userEvent);
+            } finally {
+                span.end();
+            }
         }
     }
-
 }

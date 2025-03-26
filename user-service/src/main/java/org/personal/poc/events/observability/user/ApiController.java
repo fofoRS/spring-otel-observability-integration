@@ -18,40 +18,26 @@ import io.micrometer.tracing.Tracer;
 public class ApiController {
 
     private final UserService userService;
-    private final MeterRegistry meterRegistry;
-    private final Tracer tracer;
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable("id") Long id,
-                                               @RequestParam(value = "fail", defaultValue = "false") boolean fail,
-                                               @RequestParam(value = "delayMillis", defaultValue = "0") Long delayMillis) throws UserNotFoundException {
-        var span = tracer.currentSpan();
-        span.tag("user.id", id.toString());
-        
-        Timer.Sample sample = Timer.start(meterRegistry);
-        
-        try {
-            if (fail) {
-                log.error("Failed to get user with id: {}", id);
-                span.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get user: " + id));
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get user: " + id);
-                
-            }
+            @RequestParam(value = "fail", defaultValue = "false") boolean fail,
+            @RequestParam(value = "delayMillis", defaultValue = "0") Long delayMillis) throws UserNotFoundException {
+        if (fail) {
+            log.error("Failed to get user with id: {}", id);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get user: " + id);
 
-            if (delayMillis > 0) {
-                try {
-                    Thread.sleep(delayMillis);
-                } catch (InterruptedException e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get user");
-                }
-            }   
-            UserResponse userResponse = userService.findUser(id);
-            log.debug("User found with id: {}", id);
-            return ResponseEntity.ok(userResponse);
-        } finally {
-            sample.stop(Timer.builder("user.get.duration")
-                    .tag("user.id", id.toString())
-                    .register(meterRegistry));
         }
+
+        if (delayMillis > 0) {
+            try {
+                Thread.sleep(delayMillis);
+            } catch (InterruptedException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get user");
+            }
+        }
+        UserResponse userResponse = userService.findUser(id);
+        log.debug("User found with id: {}", id);
+        return ResponseEntity.ok(userResponse);
     }
 }

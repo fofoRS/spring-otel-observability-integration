@@ -5,17 +5,18 @@ spring:
     name: event-consumer
   cloud:
     function:
-      definition: clickEvents
+      definition: rawClickEvents|enrichClickEvent|logClickEvents
+      bindings:
     stream:
       bindings:
-        clickEvents-in-0:
+        rawClickEvents|enrichClickEvent|logClickEvents-in-0:
           destination: click-events
           group: raw-click-events
       rabbit:
         bindings:
-          clickEvents-in-0:
+          rawClickEvents|enrichClickEvent|logClickEvents-in-0:
             consumer:
-              binding-routing-key: "user.events.click"
+              binding-routing-key: "user.raw.events.click"
 
 management:
   tracing:
