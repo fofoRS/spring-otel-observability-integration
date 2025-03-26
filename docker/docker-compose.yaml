@@ -35,6 +35,7 @@ services:
       - jaeger-all-in-one
       - zipkin-all-in-one
 
+  #prometheus
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
@@ -42,3 +43,14 @@ services:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+
+  #Postgres DB
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: local
+      POSTGRES_USER: local
+      POSTGRES_DB: local
+    ports:
+      - "5432:5432"
