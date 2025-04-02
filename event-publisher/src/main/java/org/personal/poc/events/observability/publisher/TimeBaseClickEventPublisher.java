@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
+import io.micrometer.tracing.Baggage;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 
@@ -42,11 +43,13 @@ public class TimeBaseClickEventPublisher {
             Span span = tracer.nextSpan().name("raw-user-client-event-publisher");
             try (Tracer.SpanInScope ws = tracer.withSpan(span.start())) {
                 logger.info("Publishing event - {}", userEvent);
-                span.tag("user.id", userEvent.userId().toString());
                 span.tag("event.type", userEvent.eventType());
-                span.tag("timestamp", userEvent.timestamp().toString());
-                
-                streamBridge.send(outputChannel, userEvent);
+                span.tag("timestamp", userEvent.timestamp().toString());    
+                span.tag("user.id", userEvent.userId().toString());                
+
+                try (var baggage = tracer.createBaggageInScope("user.id", userEvent.userId().toString())) {
+                    streamBridge.send(outputChannel, userEvent);
+                }
             } finally {
                 span.end();
             }

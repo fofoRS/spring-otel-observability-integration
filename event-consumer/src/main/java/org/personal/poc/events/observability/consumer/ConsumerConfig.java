@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import io.micrometer.tracing.Baggage;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -15,10 +19,18 @@ import java.util.function.Function;
 public class ConsumerConfig {
 
     Logger log = LoggerFactory.getLogger(ConsumerConfig.class);
+    private final Tracer tracer;
+
+    public ConsumerConfig(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
     @Bean
     public Function<Message<UserEvent>, Message<UserEvent>> rawClickEvents() {
         return message -> {
+            Span span = tracer.currentSpan();
+            Baggage userIdBaggage = tracer.getBaggage("user.id");
+            span.tag("user.id", userIdBaggage.get());
             log.info("Raw event received - {}", message.getPayload());
              return message;
         };
