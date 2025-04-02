@@ -25,6 +25,7 @@ public class TimeBaseClickEventPublisher {
         this.tracer = tracer;
     }
 
+    
     public void initPublishing() throws InterruptedException {
         String eventType = "userClickEvent";
         Long count = 0L;
