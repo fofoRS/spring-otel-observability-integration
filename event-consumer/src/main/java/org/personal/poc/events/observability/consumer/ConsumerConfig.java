@@ -23,15 +23,12 @@ public class ConsumerConfig {
     Logger log = LoggerFactory.getLogger(ConsumerConfig.class);
     private final Tracer tracer;
 
-    public ConsumerConfig(Tracer tracer) {
+    public ConsumerConfig(Tracer tracer, RestClient restClient) {
         this.tracer = tracer;
+        this.restClient = restClient;
     }
 
     private final RestClient restClient;
-
-    public ConsumerConfig(RestClient restClient) {
-        this.restClient = restClient;
-    }
 
     @Bean
     public Function<Message<UserEvent>, Message<UserEvent>> rawClickEvents() {
@@ -52,7 +49,7 @@ public class ConsumerConfig {
             UserApiResponse userApiResponse = restClient.get()
             .uri("http://localhost:8080/api/v1/users/{id}", event.userId())
             .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> log.error("User not found with id: {}", event.userId()))
+        .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> log.error("User not found with id: {}", event.userId()))
             .body(UserApiResponse.class);
 
             if (userApiResponse == null) {
