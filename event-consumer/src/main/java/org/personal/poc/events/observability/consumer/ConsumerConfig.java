@@ -10,6 +10,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.client.RestClient;
 
+import io.micrometer.tracing.Baggage;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -17,16 +21,21 @@ import java.util.function.Function;
 public class ConsumerConfig {
 
     Logger log = LoggerFactory.getLogger(ConsumerConfig.class);
+    private final Tracer tracer;
 
-    private final RestClient restClient;
-
-    public ConsumerConfig(RestClient restClient) {
+    public ConsumerConfig(Tracer tracer, RestClient restClient) {
+        this.tracer = tracer;
         this.restClient = restClient;
     }
+
+    private final RestClient restClient;
 
     @Bean
     public Function<Message<UserEvent>, Message<UserEvent>> rawClickEvents() {
         return message -> {
+            Span span = tracer.currentSpan();
+            Baggage userIdBaggage = tracer.getBaggage("user.id");
+            span.tag("user.id", userIdBaggage.get());
             log.info("Raw event received - {}", message.getPayload());
              return message;
         };
@@ -40,7 +49,7 @@ public class ConsumerConfig {
             UserApiResponse userApiResponse = restClient.get()
             .uri("http://localhost:8080/api/v1/users/{id}", event.userId())
             .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> log.error("User not found with id: {}", event.userId()))
+        .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> log.error("User not found with id: {}", event.userId()))
             .body(UserApiResponse.class);
 
             if (userApiResponse == null) {
