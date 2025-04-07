@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
-import io.micrometer.tracing.Baggage;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 

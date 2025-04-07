@@ -4,7 +4,7 @@ spring:
   datasource:
     password: local
     username: local
-    url: jdbc:postgresql://host.docker.internal:5432/local
+    url: jdbc:postgresql://localhost:5432/local
     driver-class-name: org.postgresql.Driver
 logging:
   level:
@@ -21,8 +21,8 @@ management:
     metrics:
       export:
         url: http://localhost:4318/v1/metrics
-        enabled: false
+        enabled: true
     tracing:
       endpoint: http://localhost:4318/v1/traces
       export:
-        enabled: false
+        enabled: true
