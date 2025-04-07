@@ -32,6 +32,11 @@ exporters:
 
 processors:
   batch:
+  filter/ottl:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["spring.cloud.function.definition"] == "streamBridge"'
 
 extensions:
   health_check:
@@ -45,7 +50,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch,filter/ottl]
       exporters: [debug,zipkin, otlp/jaeger]
     metrics:
       receivers: [otlp]
