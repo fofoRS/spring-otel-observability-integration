@@ -8,6 +8,8 @@ spring:
     driver-class-name: org.postgresql.Driver
 logging:
   level:
+    io.micrometer.tracing: "debug"
+    io.opentelemetry: "debug"
     org.personal.poc.events.observability.user: "debug"
 
 management:
@@ -17,12 +19,15 @@ management:
     baggage:
       correlation:
         enabled: true
+    propagation:
+      type: W3C
   otlp:
     metrics:
       export:
-        url: http://localhost:4318/v1/metrics
-        enabled: false
+        url: http://host.docker.internal:4318/v1/metrics
+        enabled: true
     tracing:
-      endpoint: http://localhost:4318/v1/traces
+      endpoint: http://host.docker.internal:4318/v1/traces
       export:
-        enabled: false
+        enabled: true
+    
