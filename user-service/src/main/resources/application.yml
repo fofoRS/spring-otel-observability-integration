@@ -24,10 +24,10 @@ management:
   otlp:
     metrics:
       export:
-        url: http://host.docker.internal:4318/v1/metrics
+        url: http://otel-collector:4318/v1/metrics
         enabled: true
     tracing:
-      endpoint: http://host.docker.internal:4318/v1/traces
+      endpoint: http://otel-collector:4318/v1/traces
       export:
         enabled: true
     
