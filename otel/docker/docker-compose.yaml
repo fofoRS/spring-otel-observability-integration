@@ -8,6 +8,8 @@ services:
       - "16686:16686"
       - "14268"
       - "14250:14250"
+      - "4318:4318"
+      - "4317:4317"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 

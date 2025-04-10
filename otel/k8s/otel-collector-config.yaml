@@ -17,6 +17,13 @@ data:
       batch:
 
     exporters:
+      zipkin:
+        endpoint: "http://host.docker.internal:9411/api/v2/spans"
+        format: proto
+      otlp/jaeger:
+        endpoint: "http://host.docker.internal:4317"
+        tls:
+          insecure: true
       debug:
         verbosity: detailed
 
@@ -25,7 +32,7 @@ data:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [debug]
+          exporters: [debug, zipkin, otlp/jaeger]
         metrics:
           receivers: [otlp]
           processors: [batch]
