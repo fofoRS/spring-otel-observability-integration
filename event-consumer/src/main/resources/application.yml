@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: event-consumer
+  rabbitmq:
+    host: host.docker.internal
+    port: 5672 
+    username: guest
+    password: guest
   cloud:
     function:
       definition: rawClickEvents|enrichClickEvent|logClickEvents
@@ -28,9 +33,12 @@ management:
   otlp:
     metrics:
       export:
-        url: http://localhost:4318/v1/metrics
+        url: http://otel-collector:4318/v1/metrics
         enabled: true
     tracing:
-      endpoint: http://localhost:4318/v1/traces
+      endpoint: http://otel-collector:4318/v1/traces
       export:
         enabled: true
+
+external-endpoints:
+  user-service-url: http://user-service:8080
