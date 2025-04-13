@@ -4,12 +4,10 @@ spring:
   datasource:
     password: local
     username: local
-    url: jdbc:postgresql://host.docker.internal:5432/local
+    url: jdbc:postgresql://localhost:5432/local
     driver-class-name: org.postgresql.Driver
 logging:
   level:
-    io.micrometer.tracing: "debug"
-    io.opentelemetry: "debug"
     org.personal.poc.events.observability.user: "debug"
 
 management:
@@ -19,15 +17,12 @@ management:
     baggage:
       correlation:
         enabled: true
-    propagation:
-      type: W3C
   otlp:
     metrics:
       export:
-        url: http://otel-collector:4318/v1/metrics
+        url: http://localhost:4318/v1/metrics
         enabled: true
     tracing:
-      endpoint: http://otel-collector:4318/v1/traces
+      endpoint: http://localhost:4318/v1/traces
       export:
         enabled: true
-    
